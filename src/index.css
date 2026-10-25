@@ -1,0 +1,254 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'DM Sans:Bold';
+  src: url('https://static.figma.com/font/DMSans_opsz_wght__1') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: 'DM Sans:Regular';
+  src: url('https://static.figma.com/font/DMSans_opsz_wght__1') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'DM Sans:SemiBold';
+  src: url('https://static.figma.com/font/DMSans_opsz_wght__1') format('woff2');
+  font-style: normal;
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: 'Outfit:Bold';
+  src: url('https://static.figma.com/font/Outfit_wght__2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: 'Outfit:ExtraBold';
+  src: url('https://static.figma.com/font/Outfit_wght__2') format('woff2');
+  font-style: normal;
+  font-weight: 800;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body,
+  #root {
+    min-width: 320px;
+    min-height: 100dvh;
+  }
+
+  body {
+    background: #fff;
+    color: #1e2022;
+  }
+}
+
+[data-name='search-action-button'],
+[data-name='advertise-cta'],
+[data-name='contact-btn'],
+[data-name^='tab-'],
+[data-name^='pill-'],
+[data-name='see-all-btn'],
+[data-name='view-button'],
+[data-name$='store-badge'],
+[data-name='google-play-badge'],
+[data-name^='social-box-'] {
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+[data-name='search-action-button']:hover,
+[data-name='advertise-cta']:hover,
+[data-name='contact-btn']:hover,
+[data-name='see-all-btn']:hover,
+[data-name='view-button']:hover {
+  opacity: 0.86;
+}
+
+[data-name='property-card'],
+[data-name='agent-card'],
+[data-name='category-tile'] {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+[data-name='property-card']:hover,
+[data-name='agent-card']:hover,
+[data-name='category-tile']:hover {
+  transform: translateY(-3px);
+}
+
+@media (max-width: 1024px) {
+  [data-name='navbar'],
+  [data-name='trending-section'],
+  [data-name='categories-section'],
+  [data-name='agents-section'],
+  [data-name='neighborhood-section'],
+  [data-name='mortgage-section'],
+  [data-name='recommended-section'],
+  [data-name='app-section'],
+  [data-name='footer'] {
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+  }
+
+  [data-name='nav-links'] {
+    display: none;
+  }
+
+  [data-name='properties-grid'],
+  [data-name='recommended-grid'],
+  [data-name='agents-grid'] {
+    flex-wrap: wrap;
+  }
+
+  [data-name='property-card'],
+  [data-name='agent-card'] {
+    flex: 1 1 calc(50% - 24px);
+  }
+
+  [data-name='split-layout'],
+  [data-name='app-section'] {
+    gap: 36px !important;
+  }
+
+  [data-name='copy-side'] {
+    width: min(46%, 560px) !important;
+  }
+
+  [data-name='footer-upper'] {
+    flex-wrap: wrap;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 700px) {
+  [data-name='navbar'] {
+    height: 68px !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  [data-name='nav-right'] > p,
+  [data-name='advertise-cta'] {
+    display: none;
+  }
+
+  [data-name='hero-section'] {
+    height: 560px !important;
+    padding: 36px 18px !important;
+  }
+
+  [data-name='hero-content'] {
+    width: 100% !important;
+  }
+
+  [data-name='title-wrapper'] > p:last-child {
+    font-size: 38px !important;
+  }
+
+  [data-name='input-row'] {
+    height: auto !important;
+    flex-wrap: wrap;
+    padding: 10px !important;
+  }
+
+  [data-name='input-row'] > p {
+    min-width: calc(100% - 36px);
+    font-size: 14px !important;
+  }
+
+  [data-name='search-action-button'] {
+    width: 100%;
+  }
+
+  [data-name='quick-filters'] {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  [data-name='trending-section'],
+  [data-name='categories-section'],
+  [data-name='agents-section'],
+  [data-name='neighborhood-section'],
+  [data-name='mortgage-section'],
+  [data-name='recommended-section'],
+  [data-name='app-section'],
+  [data-name='footer'] {
+    padding: 44px 18px !important;
+  }
+
+  [data-name='section-header'] {
+    align-items: flex-start !important;
+    gap: 10px;
+    white-space: normal !important;
+  }
+
+  [data-name='section-header'] p:last-child {
+    font-size: 27px !important;
+  }
+
+  [data-name='properties-grid'],
+  [data-name='recommended-grid'],
+  [data-name='agents-grid'],
+  [data-name='row-1'],
+  [data-name='row-2'],
+  [data-name='split-layout'],
+  [data-name='app-section'] {
+    flex-direction: column;
+  }
+
+  [data-name='property-card'],
+  [data-name='agent-card'],
+  [data-name='category-tile'] {
+    flex: none;
+    width: 100%;
+  }
+
+  [data-name='map-mockup'],
+  [data-name='illustration-side'],
+  [data-name='phone-side'],
+  [data-name='info-side'],
+  [data-name='copy-side'] {
+    width: 100% !important;
+  }
+
+  [data-name='phone-side'],
+  [data-name='map-mockup'] {
+    height: 300px !important;
+    flex: none !important;
+  }
+
+  [data-name='footer-upper'] {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-name='footer-brand'] {
+    grid-column: 1 / -1;
+    width: 100% !important;
+  }
+
+  [data-name='socials-and-disclaimer'],
+  [data-name='copyright-line'] {
+    align-items: flex-start !important;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  [data-name='socials-and-disclaimer'] > p {
+    width: 100% !important;
+  }
+}
