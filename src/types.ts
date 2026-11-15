@@ -46,12 +46,16 @@ export interface MortgageCalc {
   home_price: number; down_payment: number; annual_rate: number; years: number; loan_amount: number
   principal_and_interest: number; property_tax: number; insurance: number; hoa: number
   total_monthly: number; total_interest: number; total_paid: number
+  schedule?: Record<string, unknown>[] | null
 }
 export interface Rates { rates: { product: string; rate: number }[]; note: string }
 export interface Affordability {
   max_price: number; loan_amount: number; monthly_housing_budget: number
   debt_to_income: number; rate_used: number; estimated_monthly_payment: number
 }
+export interface PreApprovalOut { id: number; estimate: Affordability; detail: string }
+export interface LeadOut { id: number; status?: string; detail: string }
+export interface Message { detail: string }
 
 export interface SearchFilters {
   q: string
@@ -63,4 +67,6 @@ export interface SearchFilters {
   baths?: number
   home_type?: string
   sort?: 'newest' | 'price_asc' | 'price_desc' | 'sqft_desc'
+  page?: number
+  page_size?: number
 }

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { api, tokenStore } from './api'
+import { api, AUTH_EXPIRED_EVENT, tokenStore } from './api'
 import type { User } from './types'
 
 /* ---------- Toasts ---------- */
@@ -56,14 +56,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authOpen, setAuthOpen] = useState(false)
 
   const loadFavs = useCallback(async () => {
-    try { setFav(new Set(await api.favoriteIds())) } catch { setFav(new Set()) }
+    try { setFav(new Set(await api.favorites.ids())) } catch { setFav(new Set()) }
   }, [])
 
   // Restore session on load.
   useEffect(() => {
     if (!tokenStore.get()) { setReady(true); return }
-    api.me().then(u => { setUser(u); return loadFavs() }).catch(() => tokenStore.set(null)).finally(() => setReady(true))
+    api.auth.me().then(u => { setUser(u); return loadFavs() }).catch(() => tokenStore.set(null)).finally(() => setReady(true))
   }, [loadFavs])
+
+  useEffect(() => {
+    const expireSession = () => {
+      setUser(null)
+      setFav(new Set())
+      setAuthOpen(true)
+    }
+    window.addEventListener(AUTH_EXPIRED_EVENT, expireSession)
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, expireSession)
+  }, [])
 
   // Action the visitor was attempting (e.g. saving a home) when we asked them to sign in.
   const pending = useRef<(() => void) | undefined>(undefined)
@@ -93,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const had = favoriteIds.has(id)
     setFav(prev => { const n = new Set(prev); had ? n.delete(id) : n.add(id); return n })   // optimistic
     try {
-      await (had ? api.removeFavorite(id) : api.addFavorite(id))
+      await (had ? api.favorites.remove(id) : api.favorites.add(id))
       toast(had ? 'Removed from saved homes' : 'Saved to your favorites')
     } catch (e) {
       setFav(prev => { const n = new Set(prev); had ? n.add(id) : n.delete(id); return n })   // roll back

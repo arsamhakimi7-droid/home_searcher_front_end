@@ -13,8 +13,11 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:8443. In development, requests to `/api` are proxied to `http://localhost:8000`
-(change with `VITE_PROXY_TARGET`). If the backend is down, sections show an error banner with a Retry button.
+Copy `.env.example` to `.env.local` and set `VITE_API_URL` to the backend API base
+(default `http://localhost:8000/api`). Open http://localhost:8443. The backend's
+`CORS_ORIGINS` must include `http://localhost:8443` (or the origin configured for
+your Vite port). The app checks `/api/health` on startup and shows a retry prompt
+if the backend cannot be reached.
 
 > **Windows PowerShell:** if `npm` is blocked, run `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`,
 > or use `npm.cmd install` / `npm.cmd run dev`, or use Command Prompt.
@@ -23,13 +26,12 @@ Open http://localhost:8443. In development, requests to `/api` are proxied to `h
 
 ```bash
 # point the build at your deployed API
-echo VITE_API_URL=https://api.your-domain.com > .env.local     # PowerShell/cmd also work with this line
+echo VITE_API_URL=https://api.your-domain.com/api > .env.local
 npm run build        # outputs ./dist (static files, host anywhere)
 npm run preview      # optional local preview of the build
 ```
 
-Then add your site's URL to the backend's `CORS_ORIGINS`, or host both on one domain behind a reverse proxy
-that forwards `/api` to the backend (then `VITE_API_URL` can stay empty).
+Then add your site's URL to the backend's `CORS_ORIGINS`.
 
 ## Structure
 

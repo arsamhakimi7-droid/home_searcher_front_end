@@ -20,8 +20,8 @@ export function AuthModal() {
     e.preventDefault(); setErr(''); setBusy(true)
     try {
       const res = mode === 'login'
-        ? await api.login({ email: f.email, password: f.password })
-        : await api.register(f)
+        ? await api.auth.login({ email: f.email, password: f.password })
+        : await api.auth.register(f)
       signIn(res.access_token, res.user)
       closeAuth()
       toast(mode === 'login' ? `Welcome back, ${res.user.full_name.split(' ')[0]}!` : 'Account created. Welcome to HomeFind!')
@@ -63,7 +63,7 @@ export function ContactModal({ agent, property, onClose }: { agent: Agent | { id
   async function submit(e: FormEvent) {
     e.preventDefault(); setErr(''); setBusy(true)
     try {
-      const res = await api.contactAgent(agent.id, { ...f, phone: f.phone || undefined, property_id: property?.id })
+      const res = await api.agents.contact(agent.id, { ...f, phone: f.phone || undefined, property_id: property?.id })
       toast(res.detail); onClose()
     } catch (e) { setErr(msg(e)) } finally { setBusy(false) }
   }
@@ -91,7 +91,7 @@ export function PropertyModal({ id, onClose, onContact }: { id: number; onClose:
   const { favoriteIds, toggleFavorite, requireAuth } = useAuth()
   const [p, setP] = useState<Property | null>(null)
   const [err, setErr] = useState('')
-  useEffect(() => { api.property(id).then(setP).catch(e => setErr(msg(e))) }, [id])
+  useEffect(() => { api.properties.getById(id).then(setP).catch(e => setErr(msg(e))) }, [id])
   const fav = p ? favoriteIds.has(p.id) : false
 
   return (
@@ -156,14 +156,14 @@ function Calculator({ initialPrice }: { initialPrice?: number }) {
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
 
-  useEffect(() => { api.rates().then(r => { setRates(r); setF(p => p.rate ? p : { ...p, rate: String(r.rates[0].rate) }) }).catch(e => setErr(msg(e))) }, [])
+  useEffect(() => { api.mortgage.rates().then(r => { setRates(r); setF(p => p.rate ? p : { ...p, rate: String(r.rates[0].rate) }) }).catch(e => setErr(msg(e))) }, [])
 
   async function run(e?: FormEvent) {
     e?.preventDefault(); setErr('')
     const [price, down, rate, years] = [num(f.price), num(f.down), num(f.rate), num(f.years)]
     if ([price, down, rate, years].some(isNaN)) return setErr('Please enter valid numbers in every field.')
     setBusy(true)
-    try { setRes(await api.calculate({ home_price: price, down_payment_pct: down, annual_rate: rate, years })) }
+    try { setRes(await api.mortgage.calculate({ home_price: price, down_payment_pct: down, annual_rate: rate, years })) }
     catch (e) { setErr(msg(e)) } finally { setBusy(false) }
   }
   useEffect(() => { if (f.rate) void run() }, [rates]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -215,7 +215,7 @@ function PreApproval({ onClose }: { onClose: () => void }) {
     if ([income, debts, down].some(isNaN)) return setErr('Please enter your income, monthly debts and down payment as numbers.')
     setBusy(true)
     try {
-      const res = await api.preApproval({
+      const res = await api.mortgage.preApproval({
         full_name: f.full_name, email: f.email, phone: f.phone || undefined,
         annual_income: income, monthly_debts: debts, down_payment: down, credit_band: f.credit,
       })

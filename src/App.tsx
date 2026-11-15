@@ -124,12 +124,12 @@ function Page() {
   const [appStore, setAppStore] = useState<string | null>(null)
 
   // data
-  const trending = useLoad(() => api.trending(), [user?.id])
-  const recommended = useLoad(() => api.recommended(), [user?.id])
-  const categories = useLoad(() => api.categories(), [])
-  const agents = useLoad(() => api.agents(), [])
+  const trending = useLoad(() => api.properties.trending(), [user?.id])
+  const recommended = useLoad(() => api.properties.recommended(), [user?.id])
+  const categories = useLoad(() => api.properties.categories(), [])
+  const agents = useLoad(() => api.agents.list(), [])
   const [hoodQuery, setHoodQuery] = useState<string | undefined>()
-  const hoods = useLoad(() => api.neighborhoods(hoodQuery), [hoodQuery])
+  const hoods = useLoad(() => api.neighborhoods.search(hoodQuery), [hoodQuery])
   const [lastHood, setLastHood] = useState<Neighborhood | null>(null)
   useEffect(() => { if (hoods.data?.[0]) setLastHood(hoods.data[0]) }, [hoods.data])
 
@@ -148,7 +148,7 @@ function Page() {
     setResults(r => ({ title, page: append ? r?.page ?? null : null, loading: true }))
     if (!append) requestAnimationFrame(() => document.getElementById('results')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
     try {
-      const page = await api.search(filters, pageNo, 8)
+      const page = await api.properties.search(filters, pageNo, 8)
       if (seq !== searchSeq.current) return
       setResults(r => ({ title, loading: false, page: append && r?.page ? { ...page, items: [...r.page.items, ...page.items] } : page }))
     } catch (e) {
@@ -175,7 +175,7 @@ function Page() {
     setResults({ title: 'Your saved homes', page: null, saved: true, loading: true })
     requestAnimationFrame(() => document.getElementById('results')?.scrollIntoView({ behavior: 'smooth' }))
     try {
-      const items = await api.favorites()
+      const items = await api.favorites.list()
       if (seq === searchSeq.current) setResults({ title: 'Your saved homes', saved: true, loading: false, page: { items, total: items.length, page: 1, page_size: items.length || 1, pages: 1 } })
     } catch (e) { setResults({ title: 'Your saved homes', saved: true, loading: false, page: null, error: (e as Error).message }) }
   })
@@ -190,8 +190,13 @@ function Page() {
     const term = q.trim()
     if (term.length < 2) { setSugg([]); return }
     let live = true
-    const t = setTimeout(() => api.suggestions(term).then(s => live && setSugg(s)).catch(() => live && setSugg([])), 200)
-    return () => { live = false; clearTimeout(t) }
+    const controller = new AbortController()
+    const t = setTimeout(() => {
+      api.properties.suggestions(term, controller.signal)
+        .then(s => live && setSugg(s))
+        .catch(() => { if (live && !controller.signal.aborted) setSugg([]) })
+    }, 200)
+    return () => { live = false; clearTimeout(t); controller.abort() }
   }, [q])
 
   const changeTab = (t: ListingType) => { setTab(t); setPrice(0) }
@@ -488,12 +493,45 @@ function Page() {
   )
 }
 
+function ServerStartup({ children }: { children: ReactNode }) {
+  const [attempt, setAttempt] = useState(0)
+  const [status, setStatus] = useState<{ checking: boolean; error: string }>({ checking: true, error: '' })
+
+  useEffect(() => {
+    let active = true
+    setStatus({ checking: true, error: '' })
+    api.health()
+      .then(() => active && setStatus({ checking: false, error: '' }))
+      .catch(error => active && setStatus({
+        checking: false,
+        error: error instanceof Error ? error.message : 'The backend health check failed.',
+      }))
+    return () => { active = false }
+  }, [attempt])
+
+  if (status.checking) {
+    return <main role="status" className="flex min-h-screen items-center justify-center text-lg text-[#1e2022]">Connecting to the HomeFind server…</main>
+  }
+  if (status.error) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
+        <h1 className="text-2xl font-bold text-[#1e2022]">Cannot reach server</h1>
+        <p role="alert" className="max-w-lg text-[#6a7074]">{status.error}</p>
+        <button onClick={() => setAttempt(value => value + 1)} className="rounded-lg bg-[#d92228] px-5 py-3 font-semibold text-white">Retry connection</button>
+      </main>
+    )
+  }
+  return children
+}
+
 export default function HomefindLandingPage() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <Page />
-      </AuthProvider>
-    </ToastProvider>
+    <ServerStartup>
+      <ToastProvider>
+        <AuthProvider>
+          <Page />
+        </AuthProvider>
+      </ToastProvider>
+    </ServerStartup>
   )
 }

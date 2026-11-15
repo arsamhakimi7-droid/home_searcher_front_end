@@ -16,8 +16,6 @@ export default defineConfig({
     host: '0.0.0.0',
     port: parseInt(process.env.PORT || '8443'),
     strictPort: true,
-    // In development the React app calls /api/..., which is forwarded to the FastAPI backend.
-    proxy: { '/api': process.env.VITE_PROXY_TARGET || 'http://localhost:8000' },
   },
   preview: {
     host: '0.0.0.0',
